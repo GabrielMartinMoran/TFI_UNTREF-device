@@ -1,0 +1,2 @@
+def settime() -> None:
+    pass

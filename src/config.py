@@ -1,0 +1,26 @@
+from src.platform_checker import PlatformChecker
+
+LED_PIN = 2
+ON = 1
+OFF = 0
+
+if PlatformChecker.is_linux():
+    HTTP_SERVER_HOST = 'localhost'
+    HTTP_SERVER_PORT = 5001
+else:
+    HTTP_SERVER_HOST = '192.168.4.1'
+    HTTP_SERVER_PORT = 80
+
+HTTP_SERVER_MAX_CLIENTS = 1
+HTTP_SERVER_PRINT_LOGS = True
+
+REMOTE_API_URI = 'http://192.168.0.6:5000/api'
+
+AP_SSID = 'ESP32'
+AP_PASSWORD = 'micropython'
+
+WIFI_CLIENT_MAX_CONNECTION_ATTEMPTS = 3
+WIFI_CLIENT_DELAY_BETWEEN_ATTEMPTS = 5
+
+SYNC_TIME_MAX_ATTEMPTS = 3
+SYNC_TIME_DELAY_BETWEEN_ATTEMPTS = 3
