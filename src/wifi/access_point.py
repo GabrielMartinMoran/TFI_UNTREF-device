@@ -1,10 +1,10 @@
 from src.config import AP_PASSWORD, AP_SSID
 from src.platform_checker import PlatformChecker
 
-if PlatformChecker.is_linux():
-    from platform_mocks.network import WLAN, AP_IF, AUTH_WPA_WPA2_PSK
-else:
+if PlatformChecker.is_device():
     from network import WLAN, AP_IF, AUTH_WPA_WPA2_PSK
+else:
+    from platform_mocks.network import WLAN, AP_IF, AUTH_WPA_WPA2_PSK
 
 
 class AccessPoint:

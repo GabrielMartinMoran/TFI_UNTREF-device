@@ -1,11 +1,22 @@
+import gc
+import json
 import socket
 from _thread import start_new_thread
 from time import sleep
+
+from src.http import http_methods
 
 
 class HTTPServer:
     _started = False
     _connected_clients = 0
+    _STATUS_CODES = {
+        200: 'OK',
+        400: 'Bad Request',
+        404: 'Not Found',
+        500: 'Internal Server Error'
+    }
+    _READ_BUFFER_SIZE = 4046
 
     def __init__(self, host: str, port: int, max_clients: int = 1, print_log: bool = False):
         self._configure(host, port, max_clients, print_log)
@@ -33,9 +44,11 @@ class HTTPServer:
             self._listen_clients()
 
     @classmethod
-    def _is_request(cls, string: str):
-        # TODO add more HTTP methods
-        return string[:3] == 'GET'
+    def _is_request(cls, head: str) -> bool:
+        for method in [http_methods.GET, http_methods.POST]:
+            if head.startswith(f'{method} '):
+                return True
+        return False
 
     def stop(self):
         self._started = False
@@ -49,89 +62,82 @@ class HTTPServer:
             pass
         self._server.close()
 
-    def _map_params(self, params):
-        map = {}
+    @classmethod
+    def _map_url_params(cls, params: 'List[str]') -> dict:
+        params_map = {}
         for x in params:
             param = x.split('=')
-            map[param[0]] = param[1]
-        return map
+            params_map[param[0]] = param[1]
+        return params_map
 
-    def __dividir_url(self, url):
+    @classmethod
+    def _partition_url(cls, url: str) -> 'List[str]':
         data = url.replace('?', ' ')
         data = data.replace('&', ' ')
         return data.split(' ')
 
-    """
-    #En desuso debido a problema de profundidad de recursion
-    def __atender_request(self, request_str):
-        data = request_str[4:].split(' ')[0]
-        request_data = self.__dividir_url(data)
-        url = request_data[0]
-        parametros = self.__mapear_parametros(request_data[1:])
-        if(self.__imprimir_log):
-            print("REQUEST TO:",url)
-        return self.__rutear(url,parametros)
-    """
-
-    def __atender_cliente(self, conexion):
-        # Agregamos el cliente como conectado
+    def _attend_client(self, connection: socket.socket) -> None:
         self._connected_clients += 1
-        cl_file = conexion.makefile('rwb', 0)
+
         data = b''
         while True:
-            line = cl_file.readline()
-            if not line or line == b'\r\n':
+            pulled = connection.recv(self._READ_BUFFER_SIZE)
+            data += pulled
+            if len(pulled) < self._READ_BUFFER_SIZE:
                 break
-            data += line
 
-        decoded_data = data.decode('utf-8')
-        response = ""
-        if (self._is_request(decoded_data)):
-            # __atender_request
-            data = decoded_data[4:].split(' ')[0]
-            request_data = self.__dividir_url(data)
-            url = request_data[0]
-            parametros = self._map_params(request_data[1:])
-            if (self._print_log):
-                print("REQUEST TO:", url)
-            decoded_data = None
-            # __atender_request
-            response = self.__rutear(url, parametros)
-        conexion.sendall(response.encode('utf-8'))
-        conexion.close()
+        head, body = data.decode('utf-8').split('\r\n\r\n')
+        head = head.split('\r\n')[0]
         response = None
-        conexion = None
-        # Quitamos este cliente
+        try:
+            body = json.loads(body) if len(body) > 0 else {}
+        except Exception:
+            response = self._make_response({}, status_code=400)
+        if response is None and self._is_request(head):
+            method, route, protocol = head.split(' ')
+            partitioned_url = self._partition_url(route)
+            url = partitioned_url[0]
+            url_params = self._map_url_params(partitioned_url[1:])
+            print(f'{method} request to:', url)
+            response = self._route_request(method, url, url_params, body)
+        connection.sendall(response.encode('utf-8'))
+        connection.close()
+        # Clean all variables and run garbage collector
+        head = None
+        body = None
+        response = None
+        connection = None
+        gc.collect()
         self._connected_clients -= 1
 
     def _listen_clients(self):
         while self._started:
             try:
                 conexion, addr = self._server.accept()
-            except:
-                # Posible error cuando se cierra el socket
+            except Exception:
+                # An error may occur when closing the socket
                 break
-            if (self._print_log):
-                print('Cliente conectado desde:', addr)
-            start_new_thread(self.__atender_cliente, (conexion,))
+            start_new_thread(self._attend_client, (conexion,))
 
-    """
-    La funcion debe permitir recibir un parametro ya que se utilizara de la manera funcion(parametros_url)
-    """
+    @classmethod
+    def _merge_url(cls, http_method: str, path: str) -> str:
+        return f'{http_method}|{path}'
 
-    def register_route(self, path: str, function: 'Callable'):
-        self._routes[path] = function
+    def register_route(self, http_method: str, path: str, function: 'Callable'):
+        self._routes[self._merge_url(http_method, path)] = function
 
-    def __generar_response(self, data, error=False):
-        codigo = None
-        if (not error):
-            codigo = "200 OK"
+    def _make_response(self, response_data: 'Any', status_code: int = 200) -> str:
+        serialized_data = json.dumps(response_data)
+        status = f'{status_code} {self._STATUS_CODES.get(status_code, "")}'
+        content_type = 'application/json; charset=utf-8'
+        return f'HTTP/1.1 {status}\r\nContent-Type: {content_type}\r\n\r\n{serialized_data}'
+
+    def _route_request(self, http_method: str, path: str, url_params: dict, body: dict) -> str:
+        route = self._merge_url(http_method, path)
+        if route in self._routes:
+            try:
+                return self._make_response(self._routes[route](url_params, body))
+            except Exception:
+                return self._make_response({}, status_code=500)
         else:
-            codigo = "404 Not Found"
-        return "HTTP/1.1 " + codigo + "\r\nContent-Type: text/html\r\n\r\n" + data
-
-    def __rutear(self, url, parametros):
-        if (url in self._routes):
-            return self.__generar_response(self._routes[url](parametros))
-        else:
-            return self.__generar_response("URL NO ENCONTRADA", error=True)
+            return self._make_response({}, status_code=404)

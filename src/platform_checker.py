@@ -4,5 +4,5 @@ from sys import platform
 class PlatformChecker:
 
     @classmethod
-    def is_linux(cls):
-        return platform == 'linux'
+    def is_device(cls):
+        return platform == 'esp32'

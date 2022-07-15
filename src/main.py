@@ -5,10 +5,10 @@ from src.http.configuration_web_api import ConfigurationWebAPI
 from src.platform_checker import PlatformChecker
 from src.wifi.wifi_client import WiFiClient
 
-if PlatformChecker.is_linux():
-    import platform_mocks.machine as machine
-else:
+if PlatformChecker.is_device():
     import machine
+else:
+    import platform_mocks.machine as machine
 import time
 
 

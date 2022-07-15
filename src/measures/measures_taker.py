@@ -2,10 +2,10 @@ import random
 
 from src.platform_checker import PlatformChecker
 
-if PlatformChecker.is_linux():
-    from platform_mocks.machine import RTC
-else:
+if PlatformChecker.is_device():
     from machine import RTC
+else:
+    from platform_mocks.machine import RTC
 
 from src.measures.measure import Measure
 

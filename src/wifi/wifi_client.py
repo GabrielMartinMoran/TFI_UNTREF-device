@@ -4,12 +4,12 @@ from src.config import WIFI_CLIENT_MAX_CONNECTION_ATTEMPTS, WIFI_CLIENT_DELAY_BE
     SYNC_TIME_DELAY_BETWEEN_ATTEMPTS
 from src.platform_checker import PlatformChecker
 
-if PlatformChecker.is_linux():
-    from platform_mocks.network import WLAN, STA_IF
-    from platform_mocks import ntptime
-else:
+if PlatformChecker.is_device():
     from network import WLAN, STA_IF
     import ntptime
+else:
+    from platform_mocks.network import WLAN, STA_IF
+    from platform_mocks import ntptime
 
 from src.state.state_provider import StateProvider
 from src.wifi.wifi_network import WiFiNetwork
@@ -32,6 +32,11 @@ class WiFiClient:
         return [WiFiNetwork.from_dict(x) for x in config]
 
     def register_network(self, wifi_network: WiFiNetwork) -> None:
+        # If the network is already registered override it
+        already_registered_network = [x for x in self._wifi_networks if x.ssid == wifi_network.ssid]
+        already_registered_network = already_registered_network[0] if len(already_registered_network) > 0 else None
+        if already_registered_network is not None:
+            self._wifi_networks.remove(already_registered_network)
         self._wifi_networks.append(wifi_network)
         StateProvider.put(self._WIFI_NETWORK_STATE_KEY, [x.to_dict() for x in self._wifi_networks])
 

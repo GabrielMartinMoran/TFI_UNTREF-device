@@ -4,12 +4,12 @@ LED_PIN = 2
 ON = 1
 OFF = 0
 
-if PlatformChecker.is_linux():
-    HTTP_SERVER_HOST = 'localhost'
-    HTTP_SERVER_PORT = 5001
-else:
+if PlatformChecker.is_device():
     HTTP_SERVER_HOST = '192.168.4.1'
     HTTP_SERVER_PORT = 80
+else:
+    HTTP_SERVER_HOST = 'localhost'
+    HTTP_SERVER_PORT = 5001
 
 HTTP_SERVER_MAX_CLIENTS = 1
 HTTP_SERVER_PRINT_LOGS = True
