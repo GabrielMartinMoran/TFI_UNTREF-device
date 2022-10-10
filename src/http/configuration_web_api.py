@@ -1,5 +1,3 @@
-import json
-
 from src.config import HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIENTS, HTTP_SERVER_PRINT_LOGS
 from src.http import http_methods
 from src.http.http_server import HTTPServer

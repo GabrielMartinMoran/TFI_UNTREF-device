@@ -1,7 +1,7 @@
 import time
 
-from src.config import WIFI_CLIENT_MAX_CONNECTION_ATTEMPTS, WIFI_CLIENT_DELAY_BETWEEN_ATTEMPTS, SYNC_TIME_MAX_ATTEMPTS, \
-    SYNC_TIME_DELAY_BETWEEN_ATTEMPTS
+from src.config import WIFI_CLIENT_MAX_CONNECTION_ATTEMPTS, WIFI_CLIENT_DELAY_BETWEEN_ATTEMPTS, \
+    SYNC_TIME_MAX_ATTEMPTS, SYNC_TIME_DELAY_BETWEEN_ATTEMPTS
 from src.platform_checker import PlatformChecker
 
 if PlatformChecker.is_device():
@@ -82,7 +82,7 @@ class WiFiClient:
         while attempts <= SYNC_TIME_MAX_ATTEMPTS:
             try:
                 ntptime.settime()
-                print(f'Time synchronized successfully!')
+                print('Time synchronized successfully!')
                 return
             except Exception as e:
                 print(f'An error has occurred when trying to synchronize the time: {str(e)}')

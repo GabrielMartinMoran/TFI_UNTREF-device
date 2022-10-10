@@ -1,4 +1,3 @@
-import os
 from typing import Optional, List
 
 from src.state.state_provider import StateProvider

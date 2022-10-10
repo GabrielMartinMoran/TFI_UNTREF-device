@@ -1,5 +1,4 @@
 import math
-import random
 import time
 
 from platform_mocks.machine import Pin

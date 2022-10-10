@@ -1,7 +1,5 @@
-import random
 import time
 
-from src.config import AC_SENSOR_PIN
 from src.platform_checker import PlatformChecker
 
 if PlatformChecker.is_device():
@@ -68,7 +66,7 @@ class MeasuresTaker:
 
         while time.time() < t_end:
             sensor_voltage = self._get_sensor_voltage()
-            sensor_voltage -= self._standby_voltage  # 0A en sensor en 0 corresponde a 2.5V de salida -> El 2.35 se obtiene al medir la salida del sensor a 0A (valor de referencia 2.5V)
+            sensor_voltage -= self._standby_voltage
             if sensor_voltage < 0:
                 sensor_voltage = 0
             # current = 0.9 * current + 0.1 * (sensor_voltage / sensitivity)

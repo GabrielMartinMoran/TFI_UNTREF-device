@@ -2,7 +2,7 @@ from src.exceptions.unauthenticated_exception import UnauthenticatedException
 from src.measures.measures_sender import MeasuresSender
 from src.measures.measures_taker import MeasuresTaker
 from src.wifi.access_point import AccessPoint
-from src.config import LED_PIN, ON, AC_SENSOR_PIN
+from src.config import LED_PIN, ON
 from src.http.configuration_web_api import ConfigurationWebAPI
 from src.platform_checker import PlatformChecker
 from src.wifi.wifi_client import WiFiClient
