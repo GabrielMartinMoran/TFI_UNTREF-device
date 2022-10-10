@@ -3,6 +3,7 @@ import json
 from src.config import HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIENTS, HTTP_SERVER_PRINT_LOGS
 from src.http import http_methods
 from src.http.http_server import HTTPServer
+from src.state.state_provider import StateProvider
 from src.wifi.wifi_network import WiFiNetwork
 from src.wifi.wifi_client import WiFiClient
 
@@ -32,6 +33,9 @@ class ConfigurationWebAPI:
         self._server.register_route(http_methods.GET, '/api/stop', self._stop_server_route)
         self._server.register_route(http_methods.POST, '/api/networks', self._configure_network_route)
         self._server.register_route(http_methods.GET, '/api/networks', self._get_configured_wifi_networks_route)
+        self._server.register_route(http_methods.POST, '/api/token', self._register_token_route)
+        self._server.register_route(http_methods.GET, '/api/device_id', self._get_device_id_route)
+        self._server.register_route(http_methods.POST, '/api/device_id', self._set_device_id_route)
 
     def _health_route(self, params: dict, body: dict) -> str:
         return {'active': True}
@@ -46,3 +50,16 @@ class ConfigurationWebAPI:
 
     def _get_configured_wifi_networks_route(self, params: dict, body: dict) -> str:
         return [x.to_dict() for x in self._wifi_network.get_configured_networks()]
+
+    def _register_token_route(self, params: dict, body: dict) -> str:
+        StateProvider.put('token', body['token'])
+        return {}
+
+    def _get_device_id_route(self, params: dict, body: dict) -> str:
+        return {'device_id': StateProvider.get('device_id')}
+
+    def _set_device_id_route(self, params: dict, body: dict) -> str:
+        if StateProvider.get('device_id') is not None:
+            raise AssertionError('device_id already set')
+        StateProvider.put('device_id', body['device_id'])
+        return {}

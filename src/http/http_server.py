@@ -137,6 +137,8 @@ class HTTPServer:
         if route in self._routes:
             try:
                 return self._make_response(self._routes[route](url_params, body))
+            except AssertionError as e:
+                return self._make_response({'message': str(e)}, status_code=400)
             except Exception:
                 return self._make_response({}, status_code=500)
         else:

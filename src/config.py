@@ -1,6 +1,7 @@
 from src.platform_checker import PlatformChecker
 
 LED_PIN = 2
+AC_SENSOR_PIN = 34
 ON = 1
 OFF = 0
 
@@ -14,7 +15,7 @@ else:
 HTTP_SERVER_MAX_CLIENTS = 1
 HTTP_SERVER_PRINT_LOGS = True
 
-REMOTE_API_URI = 'http://192.168.0.6:5000/api'
+REMOTE_API_URI = 'http://192.168.0.8:5000/api'
 
 AP_SSID = 'ESP32'
 AP_PASSWORD = 'micropython'

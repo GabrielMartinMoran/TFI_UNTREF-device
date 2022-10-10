@@ -2,7 +2,7 @@ class Pin:
     IN = 'IN'
     OUT = 'OUT'
 
-    def __init__(self, number: int, mode: str) -> None:
+    def __init__(self, number: int, mode: str = IN) -> None:
         self._number = number
         self._mode = mode
         self._value = 0
