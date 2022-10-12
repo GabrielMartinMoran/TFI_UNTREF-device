@@ -5,6 +5,7 @@ from _thread import start_new_thread
 from time import sleep
 
 from src.http import http_methods
+from src.http.request import Request
 
 
 class HTTPServer:
@@ -43,13 +44,6 @@ class HTTPServer:
         else:
             self._listen_clients()
 
-    @classmethod
-    def _is_request(cls, head: str) -> bool:
-        for method in [http_methods.GET, http_methods.POST]:
-            if head.startswith(f'{method} '):
-                return True
-        return False
-
     def stop(self):
         self._started = False
         # Wait until no more clients are connected
@@ -86,20 +80,21 @@ class HTTPServer:
             if len(pulled) < self._READ_BUFFER_SIZE:
                 break
 
-        head, body = data.decode('utf-8').split('\r\n\r\n')
-        head = head.split('\r\n')[0]
         response = None
         try:
-            body = json.loads(body) if len(body) > 0 else {}
+            request = Request.from_bytes(data)
         except Exception:
             response = self._make_response({}, status_code=400)
-        if response is None and self._is_request(head):
-            method, route, protocol = head.split(' ')
-            partitioned_url = self._partition_url(route)
-            url = partitioned_url[0]
-            url_params = self._map_url_params(partitioned_url[1:])
-            print(f'{method} request to:', url)
-            response = self._route_request(method, url, url_params, body)
+        if response is None and request.is_valid_method:
+            # Solve CORS
+            if request.is_cors:
+                response = self._make_cors_response(request)
+            else:
+                partitioned_url = self._partition_url(request.route)
+                url = partitioned_url[0]
+                url_params = self._map_url_params(partitioned_url[1:])
+                print(f'{request.method} request to:', url)
+                response = self._route_request(request.method, url, url_params, request.body)
         connection.sendall(response.encode('utf-8'))
         connection.close()
         # Clean all variables and run garbage collector
@@ -126,11 +121,15 @@ class HTTPServer:
     def register_route(self, http_method: str, path: str, function: 'Callable'):
         self._routes[self._merge_url(http_method, path)] = function
 
-    def _make_response(self, response_data: 'Any', status_code: int = 200) -> str:
+    def _make_response(self, response_data: 'Any', status_code: int = 200, headers: dict = None) -> str:
         serialized_data = json.dumps(response_data)
         status = f'{status_code} {self._STATUS_CODES.get(status_code, "")}'
-        content_type = 'application/json; charset=utf-8'
-        return f'HTTP/1.1 {status}\r\nContent-Type: {content_type}\r\n\r\n{serialized_data}'
+        _headers = {**(headers if headers is not None else {}), **{
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': '*'
+        }}
+        serialized_headers = '\r\n'.join([f'{k}: {v}' for k, v in _headers.items()])
+        return f'HTTP/1.1 {status}\r\n{serialized_headers}\r\n\r\n{serialized_data}'
 
     def _route_request(self, http_method: str, path: str, url_params: dict, body: dict) -> str:
         route = self._merge_url(http_method, path)
@@ -143,3 +142,14 @@ class HTTPServer:
                 return self._make_response({}, status_code=500)
         else:
             return self._make_response({}, status_code=404)
+
+    def _make_cors_response(self, request: Request) -> str:
+        return self._make_response({}, headers={
+            'Access-Control-Allow-Origin': request.headers['Origin'],
+            'Access-Control-Allow-Methods': request.headers['Access-Control-Request-Method'],
+            'Access-Control-Allow-Headers': request.headers['Access-Control-Request-Headers']
+        })
+
+    @classmethod
+    def _is_cors_request(cls, method: str) -> bool:
+        return method == http_methods.OPTIONS
