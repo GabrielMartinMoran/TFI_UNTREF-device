@@ -153,4 +153,4 @@ dmypy.json
 cython_debug/
 
 .idea/
-/state.json
+/z_state.json

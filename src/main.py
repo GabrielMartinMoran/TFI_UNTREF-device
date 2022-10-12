@@ -1,6 +1,7 @@
 from src.exceptions.unauthenticated_exception import UnauthenticatedException
 from src.measures.measures_sender import MeasuresSender
 from src.measures.measures_taker import MeasuresTaker
+from src.state.state_provider import StateProvider
 from src.wifi.access_point import AccessPoint
 from src.config import LED_PIN, ON
 from src.http.configuration_web_api import ConfigurationWebAPI
@@ -12,6 +13,10 @@ if PlatformChecker.is_device():
 else:
     import platform_mocks.machine as machine
 import time
+
+
+def is_configured() -> bool:
+    return StateProvider.get('token') is not None and StateProvider.get('device_id') is not None
 
 
 def main() -> None:
@@ -30,7 +35,7 @@ def main() -> None:
 
     while True:
         time.sleep(1)
-        if not wifi_client.has_any_network_configured():
+        if not wifi_client.has_any_network_configured() or not is_configured():
             continue
         while not wifi_client.is_connected():
             wifi_client.connect()

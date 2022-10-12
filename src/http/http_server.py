@@ -98,8 +98,7 @@ class HTTPServer:
         connection.sendall(response.encode('utf-8'))
         connection.close()
         # Clean all variables and run garbage collector
-        head = None
-        body = None
+        request = None
         response = None
         connection = None
         gc.collect()

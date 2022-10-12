@@ -48,7 +48,7 @@ class WiFiClient:
             print('Can not connect to WiFi: There are no networks configured.')
             return
         self._sta_if.active(True)
-        available_networks = self._scan_networks()
+        available_networks = self.get_available_networks()
         print(f'Available WiFi networks: {", ".join(available_networks)}')
         for network in self._wifi_networks:
             if network.ssid in available_networks:
@@ -59,7 +59,7 @@ class WiFiClient:
                     self._try_sync_time()
                     return
 
-    def _scan_networks(self) -> 'List[str]':
+    def get_available_networks(self) -> 'List[str]':
         return [x[0].decode('utf-8') for x in self._sta_if.scan()]
 
     def is_connected(self) -> bool:

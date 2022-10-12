@@ -1,3 +1,4 @@
+import random
 from typing import Optional, List
 
 from src.state.state_provider import StateProvider
@@ -26,11 +27,17 @@ class WLAN:
         self._password = password
 
     @classmethod
-    def scan(cls) -> List[tuple]:
+    def _get_mocked_networks(cls) -> List[tuple[bytes]]:
+        mocked_networks = []
+        for x in range(random.randint(1, 10)):
+            mocked_networks.append(tuple([f'MockedNetwork-{x}'.encode('utf-8')]))
+        return mocked_networks
+
+    def scan(self) -> List[tuple]:
         configured_networks = StateProvider.get('wifi_network')
         if configured_networks is None:
-            return []
-        return [tuple([x['ssid'].encode('utf-8')]) for x in configured_networks]
+            configured_networks = []
+        return [tuple([x['ssid'].encode('utf-8')]) for x in configured_networks] + self._get_mocked_networks()
 
     def isconnected(self) -> bool:
         return self._is_connected
