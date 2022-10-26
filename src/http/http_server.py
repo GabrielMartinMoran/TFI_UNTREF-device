@@ -107,11 +107,11 @@ class HTTPServer:
     def _listen_clients(self):
         while self._started:
             try:
-                conexion, addr = self._server.accept()
+                connection, addr = self._server.accept()
             except Exception:
                 # An error may occur when closing the socket
                 break
-            start_new_thread(self._attend_client, (conexion,))
+            start_new_thread(self._attend_client, (connection,))
 
     @classmethod
     def _merge_url(cls, http_method: str, path: str) -> str:

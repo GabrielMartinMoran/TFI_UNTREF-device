@@ -17,19 +17,19 @@ class MeasuresSender:
         :param measures: List of measures to send
         :return: Returns True when measures could be sent to the server
         """
-        for measure in measures:
-            try:
-                self._send_measure(measure)
-            except Exception as e:
-                print(e)
-                return False
-        return True
+        try:
+            print(f'Sending {len(measures)} measures to the server')
+            self._send_measures(measures)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
-    def _send_measure(self, measure: Measure) -> None:
+    def _send_measures(self, measures: 'List[Measure]') -> None:
         device_id = StateProvider.get('device_id')
-        response = post(f'{REMOTE_API_URI}/devices/add_measure/{device_id}', json=measure.to_dict(), headers={
-            'Authorization': self._get_token()
-        })
+        response = post(f'{REMOTE_API_URI}/devices/add_measures/{device_id}', json=[
+            measure.to_dict() for measure in measures
+        ], headers={'Authorization': self._get_token()})
         # If it failed raise an exception
         response.raise_for_status()
 

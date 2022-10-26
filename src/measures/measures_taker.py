@@ -11,7 +11,7 @@ from src.measures.measure import Measure
 
 
 class MeasuresTaker:
-    _MAX_SIZE = 10
+    _MAX_SIZE = 20
     _STANDBY_VOLTAGE_CALCULATION_TIME = 2  # Seconds
     _REF_VOLTAGE = 220.0
     _RMS_FACTOR = 0.707  # (1/(2^1/2))
