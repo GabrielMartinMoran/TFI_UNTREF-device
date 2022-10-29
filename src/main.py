@@ -2,6 +2,7 @@ from src.exceptions.unauthenticated_exception import UnauthenticatedException
 from src.measures.measures_sender import MeasuresSender
 from src.measures.measures_taker import MeasuresTaker
 from src.state.state_provider import StateProvider
+from src.status.status_updater import StatusUpdater
 from src.wifi.access_point import AccessPoint
 from src.config import LED_PIN, ON, SEND_MEASURE_EACH
 from src.http.configuration_web_api import ConfigurationWebAPI
@@ -26,12 +27,12 @@ def main() -> None:
     ap.start()
 
     wifi_client = WiFiClient()
-
-    config_web_api = ConfigurationWebAPI(wifi_client)
-    config_web_api.start(True)
-
     measures_taker = MeasuresTaker()
     measures_sender = MeasuresSender()
+    status_updater = StatusUpdater()
+
+    config_web_api = ConfigurationWebAPI(wifi_client, status_updater)
+    config_web_api.start(True)
 
     while True:
         time.sleep(1)
@@ -52,5 +53,7 @@ def main() -> None:
                     measures_taker.clear_measures(measures)
             except UnauthenticatedException:
                 print('ERROR: Unauthenticated')
+
+        status_updater.update_status()
 
     led.value(ON)
