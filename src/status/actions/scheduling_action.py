@@ -1,17 +1,16 @@
-class SchedulingAction:
-    TURN_ON_STATUS = 'TURN_DEVICE_ON'
+from src.status.actions.device_action import DeviceAction
+
+
+class SchedulingAction(DeviceAction):
 
     def __init__(self, action: str, moment: int) -> None:
-        self._action = action
+        super().__init__(action)
         self._moment = moment
         self._was_evaluated = False
 
     @property
     def moment(self) -> int:
         return self._moment
-
-    def is_turn_on(self) -> bool:
-        return self._action == self.TURN_ON_STATUS
 
     @property
     def was_evaluated(self) -> bool:
