@@ -7,10 +7,10 @@ class StateProvider:
     _state: dict = None
 
     @staticmethod
-    def get(key: str) -> 'Optional[Any]':
+    def get(key: str, default: 'Optional[Any]' = None) -> 'Optional[Any]':
         if not StateProvider._config_loaded():
             StateProvider._load()
-        return StateProvider._state.get(key)
+        return StateProvider._state.get(key, default)
 
     @staticmethod
     def put(key: str, value: 'Any') -> None:
