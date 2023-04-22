@@ -68,39 +68,50 @@ class StatusUpdater(HTTPClient):
 
     def _get_next_scheduling_action(self) -> 'Optional[SchedulingAction]':
         device_id = StateProvider.get('device_id')
-        response = get(
-            url=f'{REMOTE_API_URI}/scheduler/get_next_scheduling_action/{device_id}?use_epochs=true',
-            headers={'Authorization': self._get_token()}
-        )
-        # If it failed raise an exception
-        response.raise_for_status()
-        json_data = response.json()
+        try:
+            response = get(
+                url=f'{REMOTE_API_URI}/scheduler/get_next_scheduling_action/{device_id}?use_epochs=true',
+                headers={'Authorization': self._get_token()}
+            )
+            # If it failed raise an exception
+            response.raise_for_status()
+            json_data = response.json()
+        except Exception as e:
+            print(e)
+            return None
         if len(json_data) == 0:
             return None
         return SchedulingAction.from_dict(json_data)
 
     def _send_current_state(self) -> None:
         device_id = StateProvider.get('device_id')
-        response = post(
-            url=f'{REMOTE_API_URI}/devices/update_state/{device_id}',
-            json={'turned_on': self._turned_on},
-            headers={'Authorization': self._get_token()}
-        )
-        # If it failed raise an exception
-        response.raise_for_status()
+        try:
+            response = post(
+                url=f'{REMOTE_API_URI}/devices/update_state/{device_id}',
+                json={'turned_on': self._turned_on},
+                headers={'Authorization': self._get_token()}
+            )
+            # If it failed raise an exception
+            response.raise_for_status()
+        except Exception as e:
+            print(e)
 
     def is_turned_on(self) -> bool:
         return self._turned_on
 
     def _pull_instant_action(self) -> 'Optional[DeviceAction]':
         device_id = StateProvider.get('device_id')
-        response = get(
-            url=f'{REMOTE_API_URI}/instantactions/action/{device_id}',
-            headers={'Authorization': self._get_token()}
-        )
-        # If it failed raise an exception
-        response.raise_for_status()
-        json_data = response.json()
+        try:
+            response = get(
+                url=f'{REMOTE_API_URI}/instantactions/action/{device_id}',
+                headers={'Authorization': self._get_token()}
+            )
+            # If it failed raise an exception
+            response.raise_for_status()
+            json_data = response.json()
+        except Exception as e:
+            print(e)
+            return None
         action = json_data.get('action')
         if action is None:
             return None
