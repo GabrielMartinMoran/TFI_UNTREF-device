@@ -1,0 +1,17 @@
+[run]
+omit=
+    tests/*
+    env/*
+    venv/*
+    platform_mocks/*
+    setup.py
+    */__init__.py
+    boot.py
+    run.py
+    .coverage
+    .coveragerc
+    .gitignore
+
+[report]
+show_missing=True
+fail_under=0

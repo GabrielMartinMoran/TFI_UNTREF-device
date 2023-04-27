@@ -19,18 +19,15 @@ class HTTPServer:
     }
     _READ_BUFFER_SIZE = 4046
 
-    def __init__(self, host: str, port: int, max_clients: int = 1, print_log: bool = False):
-        self._configure(host, port, max_clients, print_log)
-        self._server = None
-        self._routes = {}
-
-    def _configure(self, host: str, port: int, max_clients: int, print_log: bool):
+    def __init__(self, host: str, port: int, max_clients: int = 1, print_log: bool = False) -> None:
         self._host = host
         self._port = port
         self._max_clients = max_clients
         self._print_log = print_log
+        self._server = None
+        self._routes = {}
 
-    def start(self, threaded=True):
+    def start(self, threaded=True) -> None:
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server.settimeout(None)
         self._server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -44,7 +41,7 @@ class HTTPServer:
         else:
             self._listen_clients()
 
-    def stop(self):
+    def stop(self) -> None:
         self._started = False
         # Wait until no more clients are connected
         while self._connected_clients > 0:
@@ -104,7 +101,7 @@ class HTTPServer:
         gc.collect()
         self._connected_clients -= 1
 
-    def _listen_clients(self):
+    def _listen_clients(self) -> None:
         while self._started:
             try:
                 connection, addr = self._server.accept()

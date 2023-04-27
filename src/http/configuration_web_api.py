@@ -40,7 +40,8 @@ class ConfigurationWebAPI:
         self._server.register_route(http_methods.POST, '/api/device_id', self._set_device_id_route)
         self._server.register_route(http_methods.POST, '/api/status', self._set_device_status_route)
 
-    def _health_route(self, params: dict, body: dict) -> dict:
+    @classmethod
+    def _health_route(cls, params: dict, body: dict) -> dict:
         return {'active': True}
 
     def _stop_server_route(self, params: dict, body: dict) -> dict:
@@ -57,14 +58,17 @@ class ConfigurationWebAPI:
     def _get_configured_wifi_networks_route(self, params: dict, body: dict) -> 'List[dict]':
         return [x.to_dict() for x in self._wifi_client.get_configured_networks()]
 
-    def _register_token_route(self, params: dict, body: dict) -> dict:
+    @classmethod
+    def _register_token_route(cls, params: dict, body: dict) -> dict:
         StateProvider.put('token', body['token'])
         return {}
 
-    def _get_device_id_route(self, params: dict, body: dict) -> dict:
+    @classmethod
+    def _get_device_id_route(cls, params: dict, body: dict) -> dict:
         return {'device_id': StateProvider.get('device_id')}
 
-    def _set_device_id_route(self, params: dict, body: dict) -> dict:
+    @classmethod
+    def _set_device_id_route(cls, params: dict, body: dict) -> dict:
         if StateProvider.get('device_id') is not None:
             raise AssertionError('device_id already set')
         StateProvider.put('device_id', body['device_id'])

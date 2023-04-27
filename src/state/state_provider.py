@@ -5,6 +5,7 @@ import json
 class StateProvider:
     _SAVED_STATE_PATH = 'state.json'
     _state: dict = None
+    _user_persistence = True
 
     @staticmethod
     def get(key: str, default: 'Optional[Any]' = None) -> 'Optional[Any]':
@@ -15,7 +16,8 @@ class StateProvider:
     @staticmethod
     def put(key: str, value: 'Any') -> None:
         StateProvider._state[key] = value
-        StateProvider._save()
+        if StateProvider._user_persistence:
+            StateProvider._save()
 
     @staticmethod
     def _save() -> None:
@@ -24,7 +26,7 @@ class StateProvider:
 
     @staticmethod
     def _load() -> None:
-        if StateProvider._config_file_exists():
+        if StateProvider._user_persistence and StateProvider._config_file_exists():
             with open(StateProvider._SAVED_STATE_PATH, 'r') as f:
                 StateProvider._state = json.loads(f.read())
         else:
@@ -38,3 +40,7 @@ class StateProvider:
     @staticmethod
     def _config_loaded() -> bool:
         return StateProvider._state is not None
+
+    @staticmethod
+    def use_persistence(user_persistence: bool) -> None:
+        StateProvider._user_persistence = user_persistence
