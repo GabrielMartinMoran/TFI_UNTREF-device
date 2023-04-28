@@ -32,7 +32,7 @@ jobs:
           python -m flake8 .
       - name: Test with pytest
         run: |
-          python -m pytest tests --cov=. --cov-config=.coveragerc --cov-report xml:cov.xml --gherkin-terminal-reporter -vv
+          python -m pytest tests --cov=. --cov-config=.coveragerc --cov-report xml:cov.xml -vv
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v1
         env:
