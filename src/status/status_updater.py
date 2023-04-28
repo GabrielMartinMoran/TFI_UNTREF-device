@@ -20,8 +20,8 @@ class StatusUpdater(HTTPClient):
         self._turned_on = StateProvider.get('turned_on', False)
         self._next_scheduling_action = None
         self._last_scheduling_action_check = 0
-        self._last_state_sent = 0
-        self._has_to_send_current_state = False
+        self._last_status_sent = 0
+        self._has_to_send_current_status = False
 
     def update_status(self) -> None:
         # First: Evaluate instant actions
@@ -35,8 +35,8 @@ class StatusUpdater(HTTPClient):
         # Third: apply the scheduling action if required
         self._apply_scheduled_action_if_required()
 
-        # Last: Send current state
-        self._send_current_state_if_required()
+        # Last: Send current status
+        self._send_current_status_if_required()
 
     def _pull_scheduling_action_if_required(self) -> None:
         now = time.time()
@@ -48,13 +48,13 @@ class StatusUpdater(HTTPClient):
             except Exception as e:
                 print(e)
 
-    def _send_current_state_if_required(self) -> None:
+    def _send_current_status_if_required(self) -> None:
         now = time.time()
-        if self._has_to_send_current_state or (now - self._last_state_sent >= INTERVAL_TO_SEND_CURRENT_STATE):
-            self._has_to_send_current_state = False
+        if self._has_to_send_current_status or (now - self._last_status_sent >= INTERVAL_TO_SEND_CURRENT_STATE):
+            self._has_to_send_current_status = False
             try:
-                self._send_current_state()
-                self._last_state_sent = now
+                self._send_current_status()
+                self._last_status_sent = now
             except Exception as e:
                 print(e)
 
@@ -63,7 +63,7 @@ class StatusUpdater(HTTPClient):
             return
         self._turned_on = turned_on
         StateProvider.put('turned_on', self._turned_on)
-        self._has_to_send_current_state = True
+        self._has_to_send_current_status = True
         print(f'DEVICE TURNED {"ON" if turned_on else "OFF"}')
 
     def _get_next_scheduling_action(self) -> 'Optional[SchedulingAction]':
@@ -83,7 +83,7 @@ class StatusUpdater(HTTPClient):
             return None
         return SchedulingAction.from_dict(json_data)
 
-    def _send_current_state(self) -> None:
+    def _send_current_status(self) -> None:
         device_id = StateProvider.get('device_id')
         try:
             response = post(

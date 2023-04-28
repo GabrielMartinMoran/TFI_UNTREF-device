@@ -53,6 +53,17 @@ class HTTPServer:
             pass
         self._server.close()
 
+    def register_route(self, http_method: str, path: str, function: 'Callable') -> None:
+        self._routes[self._merge_url(http_method, path)] = function
+
+    @property
+    def host(self) -> str:
+        return self._host
+
+    @property
+    def port(self) -> int:
+        return self._port
+
     @classmethod
     def _map_url_params(cls, params: 'List[str]') -> dict:
         params_map = {}
@@ -113,9 +124,6 @@ class HTTPServer:
     @classmethod
     def _merge_url(cls, http_method: str, path: str) -> str:
         return f'{http_method}|{path}'
-
-    def register_route(self, http_method: str, path: str, function: 'Callable'):
-        self._routes[self._merge_url(http_method, path)] = function
 
     def _make_response(self, response_data: 'Any', status_code: int = 200, headers: dict = None) -> str:
         serialized_data = json.dumps(response_data)

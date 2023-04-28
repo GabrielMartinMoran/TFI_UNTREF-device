@@ -10,7 +10,7 @@ AUTH_WPA_WPA2_PSK = 'AUTH_WPA_WPA2_PSK'
 
 class WLAN:
 
-    def __init__(self, ap_if: str) -> str:
+    def __init__(self, ap_if: str) -> None:
         self._ap_if = ap_if
         self._status = False
         self._essid = None
@@ -26,13 +26,6 @@ class WLAN:
         self._authmode = authmode
         self._password = password
 
-    @classmethod
-    def _get_mocked_networks(cls) -> List[tuple[bytes]]:
-        mocked_networks = []
-        for x in range(random.randint(1, 10)):
-            mocked_networks.append(tuple([f'MockedNetwork-{x}'.encode('utf-8')]))
-        return mocked_networks
-
     def scan(self) -> List[tuple]:
         configured_networks = StateProvider.get('wifi_network')
         if configured_networks is None:
@@ -44,3 +37,10 @@ class WLAN:
 
     def connect(self, ssid: str, password: str) -> None:
         self._is_connected = True
+
+    @classmethod
+    def _get_mocked_networks(cls) -> List[tuple[bytes]]:
+        mocked_networks = []
+        for x in range(random.randint(1, 10)):
+            mocked_networks.append(tuple([f'MockedNetwork-{x}'.encode('utf-8')]))
+        return mocked_networks

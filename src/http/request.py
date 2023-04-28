@@ -6,7 +6,7 @@ from src.http import http_methods
 class Request:
     _DIVIDER = '\r\n'
 
-    def __init__(self, method: str, route: str, protocol: str, headers: str, body: dict) -> None:
+    def __init__(self, method: str, route: str, protocol: str, headers: dict, body: dict) -> None:
         self._method = method
         self._route = route
         self._protocol = protocol

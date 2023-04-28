@@ -58,7 +58,6 @@ class MeasuresTaker:
         return [x for x in self._measures]
 
     def _measure_current(self) -> float:
-        current = 0
         min_current = 0
         max_current = 0
 
@@ -69,7 +68,6 @@ class MeasuresTaker:
             sensor_voltage -= self._standby_voltage
             if sensor_voltage < 0:
                 sensor_voltage = 0
-            # current = 0.9 * current + 0.1 * (sensor_voltage / sensitivity)
             current = round(sensor_voltage / self._SENSOR_SENSITIVITY, 3)
             if current < min_current:
                 min_current = current
