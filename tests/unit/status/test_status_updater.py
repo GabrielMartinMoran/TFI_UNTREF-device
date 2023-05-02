@@ -1,10 +1,12 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
+
+from src.status.actions.device_action import DeviceAction
 from src.status.status_updater import StatusUpdater
 
 
 @pytest.fixture
-def status_updater():
+def status_updater() -> StatusUpdater:
     return StatusUpdater()
 
 
@@ -63,3 +65,10 @@ def test_apply_scheduled_action_if_required(mock_time, status_updater):
     status_updater._next_scheduling_action = None
     status_updater._apply_scheduled_action_if_required()
     assert not status_updater._next_scheduling_action
+
+
+def test_update_status_sets_status_when_it_get_an_instant_action(status_updater):
+    status_updater._pull_instant_action = lambda: DeviceAction('TURN_DEVICE_ON')
+    status_updater.set_status = MagicMock()
+    status_updater.update_status()
+    status_updater.set_status.assert_called_with(True)

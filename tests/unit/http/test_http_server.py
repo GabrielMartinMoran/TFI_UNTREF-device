@@ -1,66 +1,81 @@
-from typing import Optional
+import socket
 
 import pytest
-import requests
-from time import sleep
+from unittest.mock import MagicMock, Mock
 
 from src.http.http_server import HTTPServer
 
-http_server: Optional[HTTPServer] = None
+
+@pytest.fixture(scope='module')
+def http_server():
+    return HTTPServer('localhost', 8080, max_clients=1, print_log=True)
 
 
-@pytest.fixture(scope='session', autouse=True)
-def run_http_server() -> HTTPServer:
-    global http_server
-    http_server = HTTPServer('localhost', 8080, max_clients=1, print_log=False)
-    # Start http_server
-    http_server.start(threaded=True)
-    sleep(0.5)
-
-    yield
-
-    # Stop http_server
-    http_server.stop()
+def test_register_route(http_server):
+    assert not http_server._routes
+    http_server.register_route('GET', '/test', MagicMock())
+    assert http_server._routes
 
 
-def test_invalid_get_route():
-    response = requests.get(f'http://{http_server.host}:{http_server.port}/invalid_route')
-    assert response.status_code == 404
+def test_map_url_params(http_server):
+    params = ['a=1', 'b=2', 'c=3']
+    actual = http_server._map_url_params(params)
+    assert actual == {'a': '1', 'b': '2', 'c': '3'}
 
 
-def test_valid_get_route():
-    http_server.register_route('GET', '/test', lambda *args: {'message': 'Test response'})
-
-    response = requests.get(f'http://{http_server.host}:{http_server.port}/test')
-
-    assert response.status_code == 200
-    assert response.json() == {'message': 'Test response'}
+def test_partition_url(http_server):
+    url = '/test?a=1&b=2&c=3'
+    actual = http_server._partition_url(url)
+    assert actual == ['/test', 'a=1', 'b=2', 'c=3']
 
 
-def test_invalid_post_route():
-    response = requests.post(f'http://{http_server.host}:{http_server.port}/invalid_route')
-    assert response.status_code == 404
+def test_merge_url(http_server):
+    actual = http_server._merge_url('GET', '/test')
+
+    assert actual == 'GET|/test'
 
 
-def test_valid_post_route():
-    def test_route(params, body):
-        assert body == {'message': 'Test request'}
-        return {'message': 'Test response'}
+def test_make_response(http_server):
+    expected = ('HTTP/1.1 200 OK\r\n'
+                'Content-Type: application/json; charset=utf-8\r\n'
+                'Access-Control-Allow-Origin: *\r\n'
+                '\r\n'
+                '{"message": "success"}')
 
-    http_server.register_route('POST', '/test', test_route)
+    actual = http_server._make_response({'message': 'success'}, status_code=200, headers={'Content-Type': 'text/html'})
 
-    response = requests.post(f'http://{http_server.host}:{http_server.port}/test', json={'message': 'Test request'})
-    assert response.status_code == 200
-    assert response.json() == {'message': 'Test response'}
+    assert actual == expected
 
 
-def test_cors_request():
-    response = requests.options(f'http://{http_server.host}:{http_server.port}/test', headers={
-        "Origin": "http://example.com",
-        "Access-Control-Request-Method": "GET",
-        "Access-Control-Request-Headers": "X-Requested-With"
-    })
-    assert response.status_code == 200
-    assert response.headers["Access-Control-Allow-Origin"] == "*"
-    assert response.headers["Access-Control-Allow-Methods"] == "GET"
-    assert response.headers["Access-Control-Allow-Headers"] == "X-Requested-With"
+def test_route_request(http_server):
+    expected = ('HTTP/1.1 200 OK\r\n'
+                'Content-Type: application/json; charset=utf-8\r\n'
+                'Access-Control-Allow-Origin: *\r\n'
+                '\r\n'
+                '{"a": "1", "b": "2", "message": "success"}')
+
+    http_server.register_route('GET', '/test', lambda p, b: {'a': p['a'], 'b': p['b'], **b})
+
+    url_params = {'a': '1', 'b': '2'}
+    body = {'message': 'success'}
+    actual = http_server._route_request('GET', '/test', url_params, body)
+
+    assert actual == expected
+
+
+def test_attend_client(http_server):
+    mock_socket = Mock(spec=socket.socket)
+    mock_socket.recv.side_effect = [('GET /test_url?param1=1&param2=2 HTTP/1.1\r\n'
+                                     'Host: example.com;\r\n'
+                                     'Content-Type: application/json;'
+                                     'charset=utf-8\r\n'
+                                     '\r\n'
+                                     '{"a": "1", "b": "2", "message": "success"}').encode()]
+
+    http_server._attend_client(mock_socket)
+
+    assert mock_socket.recv.call_count == 1
+    assert mock_socket.sendall.call_args[0][0] == (
+        b'HTTP/1.1 404 Not Found\r\nContent-Type: application/json; charset=utf-8\r\nA'
+        b'ccess-Control-Allow-Origin: *\r\n\r\n{}'
+    )

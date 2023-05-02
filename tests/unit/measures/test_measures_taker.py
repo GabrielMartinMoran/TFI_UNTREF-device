@@ -7,11 +7,10 @@ from platform_mocks.machine import RTC
 
 
 @pytest.fixture
-def measures_taker():
-    instance = MeasuresTaker()
-    instance._CURRENT_MEASUREMENT_TIME = 0.01
-    instance._STANDBY_VOLTAGE_CALCULATION_TIME = 0.01
-    return instance
+def measures_taker() -> MeasuresTaker:
+    MeasuresTaker._CURRENT_MEASUREMENT_TIME = 0.01
+    MeasuresTaker._STANDBY_VOLTAGE_CALCULATION_TIME = 0.01
+    return MeasuresTaker()
 
 
 def test_measures_taker_adds_new_measure(measures_taker):

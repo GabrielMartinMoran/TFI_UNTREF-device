@@ -32,24 +32,31 @@ class Orchestrator:
         self._led.value(ON)
         self._ap.start()
         self._config_web_api.start(True)
-        self._run_app_loop()
+        self._run_orchestration_loop()
 
-    def _run_app_loop(self) -> None:
+    def _run_orchestration_loop(self) -> None:
         while True:
             time.sleep(1)
-            if not self._wifi_client.has_any_network_configured() or not self._is_configured():
-                continue
-            while not self._wifi_client.is_connected():
-                self._wifi_client.connect()
-                time.sleep(1)
+            self._orchestrate()
 
-            if self._status_updater.is_turned_on():
-                # It only has to take measures when the device is turned on
-                self._measures_taker.take_measure()
+    def _orchestrate(self) -> None:
+        if not self._wifi_client.has_any_network_configured() or not self._is_configured():
+            return
 
-            self._measures_sender.pull_and_send(self._status_updater.is_turned_on())
+        self._try_connect_to_wifi()
 
-            self._status_updater.update_status()
+        if self._status_updater.is_turned_on():
+            # It only has to take measures when the device is turned on
+            self._measures_taker.take_measure()
+
+        self._measures_sender.pull_and_send(self._status_updater.is_turned_on())
+
+        self._status_updater.update_status()
+
+    def _try_connect_to_wifi(self) -> None:
+        while not self._wifi_client.is_connected():
+            self._wifi_client.connect()
+            time.sleep(1)
 
     @classmethod
     def _is_configured(cls) -> bool:
