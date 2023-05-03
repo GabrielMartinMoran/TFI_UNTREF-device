@@ -14,7 +14,7 @@ class StateProvider:
         return StateProvider._state.get(key, default)
 
     @staticmethod
-    def put(key: str, value: 'Any') -> None:
+    def set(key: str, value: 'Any') -> None:
         StateProvider._state[key] = value
         if StateProvider._user_persistence:
             StateProvider._save()

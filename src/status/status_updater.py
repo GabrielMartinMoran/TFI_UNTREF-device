@@ -62,7 +62,7 @@ class StatusUpdater(HTTPClient):
         if turned_on == self._turned_on:
             return
         self._turned_on = turned_on
-        StateProvider.put('turned_on', self._turned_on)
+        StateProvider.set('turned_on', self._turned_on)
         self._has_to_send_current_status = True
         print(f'DEVICE TURNED {"ON" if turned_on else "OFF"}')
 

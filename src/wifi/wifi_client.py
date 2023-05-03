@@ -38,7 +38,7 @@ class WiFiClient:
         if already_registered_network is not None:
             self._wifi_networks.remove(already_registered_network)
         self._wifi_networks.append(wifi_network)
-        StateProvider.put(self._WIFI_NETWORK_STATE_KEY, [x.to_dict() for x in self._wifi_networks])
+        StateProvider.set(self._WIFI_NETWORK_STATE_KEY, [x.to_dict() for x in self._wifi_networks])
 
     def get_configured_networks(self) -> 'List[WiFiNetwork]':
         return self._wifi_networks

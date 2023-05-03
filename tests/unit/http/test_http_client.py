@@ -9,7 +9,7 @@ def test_get_token_raises_exception_when_token_does_not_exist():
 
 
 def test_get_token_returns_bearer_token_when_token_exists():
-    StateProvider.put('token', '12345')
+    StateProvider.set('token', '12345')
 
     actual = HTTPClient._get_token()
 

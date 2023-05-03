@@ -118,7 +118,7 @@ def test_register_token_route(configuration_web_api):
 
 
 def test_get_device_id_route(configuration_web_api):
-    StateProvider.put('device_id', 'test_device_id')
+    StateProvider.set('device_id', 'test_device_id')
 
     actual = configuration_web_api._get_device_id_route({}, {})
 
@@ -133,7 +133,7 @@ def test_set_device_id_route(configuration_web_api):
 
 
 def test_set_device_id_raises_error_when_device_already_has_an_configured_id(configuration_web_api):
-    StateProvider.put('device_id', 'test_device_id')
+    StateProvider.set('device_id', 'test_device_id')
 
     with pytest.raises(AssertionError) as exc_info:
         configuration_web_api._set_device_id_route({}, {'device_id': 'new_device_id'})

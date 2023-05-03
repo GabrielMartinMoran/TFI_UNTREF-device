@@ -60,7 +60,7 @@ class ConfigurationWebAPI:
 
     @classmethod
     def _register_token_route(cls, params: dict, body: dict) -> dict:
-        StateProvider.put('token', body['token'])
+        StateProvider.set('token', body['token'])
         return {}
 
     @classmethod
@@ -71,7 +71,7 @@ class ConfigurationWebAPI:
     def _set_device_id_route(cls, params: dict, body: dict) -> dict:
         if StateProvider.get('device_id') is not None:
             raise AssertionError('device_id already set')
-        StateProvider.put('device_id', body['device_id'])
+        StateProvider.set('device_id', body['device_id'])
         return {}
 
     def _set_device_status_route(self, params: dict, body: dict) -> dict:
