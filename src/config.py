@@ -3,6 +3,8 @@ from src.platform_checker import PlatformChecker
 LED_PIN = 2
 AC_SENSOR_PIN = 34
 STATUS_CHANGE_BUTTON_PIN = 35
+RELAY_PIN = 36
+
 ON = 1
 OFF = 0
 

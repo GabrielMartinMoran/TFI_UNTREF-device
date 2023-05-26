@@ -1,5 +1,6 @@
 import time
 
+from src.components.relay import Relay
 from src.config import INTERVAL_TO_CHECK_NEXT_SCHEDULING_ACTION, REMOTE_API_URI, INTERVAL_TO_SEND_CURRENT_STATE
 from src.http.http_client import HTTPClient
 from src.status.actions.device_action import DeviceAction
@@ -23,6 +24,7 @@ class StatusUpdater(HTTPClient):
         self._last_status_sent = 0
         self._has_to_send_current_status = False
         self._manual_action = None
+        self._relay = Relay(self._turned_on)
 
     def update_status(self) -> None:
         # First: Evaluate instant actions
@@ -75,6 +77,7 @@ class StatusUpdater(HTTPClient):
         if turned_on == self._turned_on:
             return
         self._turned_on = turned_on
+        self._relay.set_status(self._turned_on)
         StateProvider.set('turned_on', self._turned_on)
         self._has_to_send_current_status = True
         print(f'DEVICE TURNED {"ON" if turned_on else "OFF"}')
