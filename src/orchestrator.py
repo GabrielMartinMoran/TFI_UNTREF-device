@@ -1,11 +1,14 @@
 import time
 
+from _thread import start_new_thread
+
 from src.config import LED_PIN, ON
 from src.http.configuration_web_api import ConfigurationWebAPI
 from src.measures.measures_sender import MeasuresSender
 from src.measures.measures_taker import MeasuresTaker
 from src.platform_checker import PlatformChecker
 from src.state.state_provider import StateProvider
+from src.status.manual_status_change_detector import ManualStatusChangeDetector
 from src.status.status_updater import StatusUpdater
 from src.wifi.access_point import AccessPoint
 from src.wifi.wifi_client import WiFiClient
@@ -27,11 +30,13 @@ class Orchestrator:
         self._status_updater = status_updater
         self._config_web_api = ConfigurationWebAPI(wifi_client, status_updater)
         self._led = machine.Pin(LED_PIN, machine.Pin.OUT)
+        self._manual_status_change_detector = ManualStatusChangeDetector(status_updater)
 
     def start(self) -> None:
         self._led.value(ON)
         self._ap.start()
         self._config_web_api.start(True)
+        start_new_thread(self._manual_status_change_detector.start_detection, ())
         self._run_orchestration_loop()
 
     def _run_orchestration_loop(self) -> None:

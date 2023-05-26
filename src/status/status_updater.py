@@ -22,6 +22,7 @@ class StatusUpdater(HTTPClient):
         self._last_scheduling_action_check = 0
         self._last_status_sent = 0
         self._has_to_send_current_status = False
+        self._manual_action = None
 
     def update_status(self) -> None:
         # First: Evaluate instant actions
@@ -35,8 +36,20 @@ class StatusUpdater(HTTPClient):
         # Third: apply the scheduling action if required
         self._apply_scheduled_action_if_required()
 
+        # Fourth: Evaluate manual actions
+        if self._manual_action is not None:
+            self.set_status(self._manual_action.is_turn_on())
+
         # Last: Send current status
         self._send_current_status_if_required()
+
+    def schedule_manual_action(self) -> None:
+        if self._turned_on:
+            self._manual_action = DeviceAction.build_turn_off()
+            print('Scheduled manual action to turn device off')
+        else:
+            self._manual_action = DeviceAction.build_turn_on()
+            print('Scheduled manual action to turn device on')
 
     def _pull_scheduling_action_if_required(self) -> None:
         now = time.time()
