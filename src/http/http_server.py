@@ -128,10 +128,12 @@ class HTTPServer:
     def _make_response(self, response_data: 'Any', status_code: int = 200, headers: dict = None) -> str:
         serialized_data = json.dumps(response_data)
         status = f'{status_code} {self._STATUS_CODES.get(status_code, "")}'
-        _headers = {**(headers if headers is not None else {}), **{
-            'Content-Type': 'application/json; charset=utf-8',
-            'Access-Control-Allow-Origin': '*'
-        }}
+        _headers = {}
+        if headers is not None:
+            for k, v in headers.items():
+                _headers[k] = v
+        _headers['Content-Type'] = 'application/json; charset=utf-8'
+        _headers['Access-Control-Allow-Origin'] = '*'
         serialized_headers = '\r\n'.join([f'{k}: {v}' for k, v in _headers.items()])
         return f'HTTP/1.1 {status}\r\n{serialized_headers}\r\n\r\n{serialized_data}'
 
