@@ -3,6 +3,8 @@ import os
 import subprocess
 from typing import List
 
+USB_INTERFACE = '/dev/ttyUSB0'
+
 EXCLUDES = {'__pycache__'}
 
 WRITE_FILE_TIMEOUT_SECONDS = 10
@@ -31,27 +33,22 @@ def generate_package(files: List[str]) -> dict:
     return package
 
 
-def main():
-    should_generate_package = input('Generate package [yes / no]: ').lower() in {'y', 'yes'}
+def main() -> None:
+    print('Searching for files to deploy...')
+    files_to_copy = ['boot.py']
+    files_to_copy += search_files_to_copy('src')
 
-    if should_generate_package:
-        print('Searching for files to deploy...')
-        files_to_copy = ['boot.py']
-        files_to_copy += search_files_to_copy('src')
+    print('Generating deployment package...')
+    package = generate_package(files_to_copy)
+    with open('deploy-package.json', 'w', encoding='utf-8') as f:
+        f.write(json.dumps(package))
 
-        print('Generating deployment package...')
-        package = generate_package(files_to_copy)
-        with open('deploy-package.json', 'w', encoding='utf-8') as f:
-            f.write(json.dumps(package))
-
-        print('Uploading packaged scripts (this operation may take some time)...')
-        subprocess.run(['ampy', '-p', '/dev/ttyUSB0', 'put', 'deploy-package.json', 'deploy-package.json'],
-                       cwd=os.getcwd())
-    else:
-        print('Skipping package generation...')
+    print('Uploading packaged scripts (this operation may take some time)...')
+    subprocess.run(['ampy', '-p', USB_INTERFACE, 'put', 'deploy-package.json', 'deploy-package.json'],
+                   cwd=os.getcwd())
 
     print('Requesting file unpackaging...')
-    subprocess.run(['ampy', '-p', '/dev/ttyUSB0', 'run', 'unpackage_files.py'], cwd=os.getcwd())
+    subprocess.run(['ampy', '-p', USB_INTERFACE, 'run', 'unpackage_files.py'], cwd=os.getcwd())
 
     print('✅All scripts uploaded!')
 

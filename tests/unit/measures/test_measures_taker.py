@@ -8,8 +8,8 @@ from platform_mocks.machine import RTC
 
 @pytest.fixture
 def measures_taker() -> MeasuresTaker:
-    MeasuresTaker._CURRENT_MEASUREMENT_TIME = 0.01
-    MeasuresTaker._STANDBY_VOLTAGE_CALCULATION_TIME = 0.01
+    MeasuresTaker._MEASUREMENT_TIME = 0.01
+    MeasuresTaker._STANDBY_VOLTAGE_MEASUREMENT_TIME = 0.01
     return MeasuresTaker()
 
 

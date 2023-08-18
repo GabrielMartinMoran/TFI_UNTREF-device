@@ -5,6 +5,7 @@ from src.measures.measure import Measure
 from src.measures.measures_taker import MeasuresTaker
 from src.platform_checker import PlatformChecker
 from src.state.state_provider import StateProvider
+from src.utils.request_status_checker import raise_if_failed
 
 if PlatformChecker.is_device():
     from urequests import post
@@ -28,7 +29,7 @@ class MeasuresSender(HTTPClient):
                 measure.to_dict() for measure in measures
             ], headers={'Authorization': self._get_token()})
             # If it failed raise an exception
-            response.raise_for_status()
+            raise_if_failed(response)
             return True
         except Exception as e:
             print(e)
