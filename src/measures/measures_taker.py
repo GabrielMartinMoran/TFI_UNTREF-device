@@ -21,11 +21,6 @@ class MeasuresTaker:
     _ADC_RESOLUTION_SIZE = 4096.0
     _RMS_FACTOR = 0.707  # (1/(2^1/2))
     """
-    Sensor: ACS712 30A version
-    Regarding sensor sensitivity, for a 5v output, the default sensitivity is 0.066 V/A
-    Reducing the voltage with a voltage divider where R1=1KΩ and R2=2KΩ, we get a reference voltage of 3.3V
-    So, if we convert the sensitivity from 5v to 3.31V, we get a sensitivity value of 0.043 V/A
-
     Sensor: ACS712 5A version
     Regarding sensor sensitivity, for a 5v output, the default sensitivity is 0.185 V/A going from -5V to 5V
     Reducing the voltage with a voltage divider where R1=1KΩ and R2=2KΩ, we get a reference voltage of 3.3V
