@@ -25,9 +25,9 @@ class ADC:
     def read_uv(self) -> int:
         # To simulate a current that varies across time
         time_diff = time.time() - self._start_time
-        return time_diff * 1000 * math.sin(time_diff) + 1000 * 1000
+        return round(time_diff * 1000 * math.sin(time_diff) + 1000 * 1000)
 
     def read(self) -> int:
         # To simulate a current that varies across time
         time_diff = time.time() - self._start_time
-        return abs(math.sin(time_diff)) * self.MAX_READ
+        return round(abs(math.sin(time_diff)) * self.MAX_READ)

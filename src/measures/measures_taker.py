@@ -24,7 +24,7 @@ class MeasuresTaker:
     Sensor: ACS712 5A version
     Regarding sensor sensitivity, for a 5v output, the default sensitivity is 0.185 V/A going from -5V to 5V
     Reducing the voltage with a voltage divider where R1=1KΩ and R2=2KΩ, we get a reference voltage of 3.3V
-    We can correct SENSOR_SENSITIVITY from 0.185 V/A at 5V to -> 0.185 V/A * (R1/(R1+R2)) = 0.06167
+    We can correct SENSOR_SENSITIVITY from 0.185 V/A at 5V to -> 0.185 V/A * (R1/(R1+R2)) = 0.06167 V/A
     (Thanks to https://github.com/RobTillaart/ACS712)
     """
     _SENSOR_SENSITIVITY = 0.06167
@@ -32,8 +32,8 @@ class MeasuresTaker:
     _MEASUREMENT_TIME = 1  # Seconds
     _STANDBY_VOLTAGE_MEASUREMENT_TIME = 2  # Seconds
 
-    # Twice the speed for better sampling (Nyquist theorem)
-    _TIME_TO_WAIT_BETWEEN_MEASURES = 1 / (config.AC_FREQUENCY * 2)
+    # At least twice the speed for better sampling (Nyquist theorem)
+    _TIME_TO_WAIT_BETWEEN_MEASURES = 1 / (config.AC_FREQUENCY * config.MEASURES_PER_CICLE)
 
     def __init__(self) -> None:
         self._rtc = RTC()
@@ -112,3 +112,11 @@ class MeasuresTaker:
             current=rms_current
         )
         self._add_measure(measure)
+
+    def debug_take_measures(self) -> 'List[str]':
+        measures = []
+        t_end = time.time() + self._MEASUREMENT_TIME
+        while time.time() < t_end:
+            measures.append(str(self._ac_sensor.read()))
+            time.sleep(self._TIME_TO_WAIT_BETWEEN_MEASURES)
+        return measures

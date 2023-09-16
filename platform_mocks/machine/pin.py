@@ -1,4 +1,11 @@
-from pynput.keyboard import Listener
+try:
+    from pynput.keyboard import Listener
+except ImportError:
+    # If there is an import error, import a mock instead (this only happens in the CI pipeline)
+    from unittest.mock import MagicMock
+
+    Listener = MagicMock()
+
 from _thread import start_new_thread
 
 from src import config

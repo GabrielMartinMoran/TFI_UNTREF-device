@@ -2,16 +2,16 @@ from src.config import HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIEN
 from src.http import http_methods
 from src.http.http_server import HTTPServer
 from src.state.state_provider import StateProvider
-from src.status.status_updater import StatusUpdater
+from src.status.device_status import DeviceStatus
 from src.wifi.wifi_network import WiFiNetwork
 from src.wifi.wifi_client import WiFiClient
 
 
 class ConfigurationWebAPI:
 
-    def __init__(self, wifi_client: WiFiClient, status_updater: StatusUpdater) -> None:
+    def __init__(self, wifi_client: WiFiClient, device_status: DeviceStatus) -> None:
         self._wifi_client = wifi_client
-        self._status_updater = status_updater
+        self._device_status = device_status
         self._should_be_running = False
         self._server = HTTPServer(HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIENTS, HTTP_SERVER_PRINT_LOGS)
         self._add_routes()
@@ -77,5 +77,8 @@ class ConfigurationWebAPI:
     def _set_device_status_route(self, params: dict, body: dict) -> dict:
         assert 'turn_on' in body, 'turn_on is required'
         assert isinstance(body['turn_on'], bool), 'turn_on must be a valid boolean'
-        self._status_updater.set_status(body['turn_on'])
+        turned_on = body['turn_on']
+        if self._device_status.is_turned_on() != turned_on:
+            self._device_status.set_status(turned_on)
+            print(f'Updated device status to {"turned on" if turned_on else "turned off"} by the configuration web api')
         return {}

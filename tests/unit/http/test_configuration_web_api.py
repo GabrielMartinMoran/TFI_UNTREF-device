@@ -11,11 +11,11 @@ from tests.mocks.http_server_mock import HTTPServerMock
 
 @pytest.fixture(autouse=True)
 @patch('src.wifi.wifi_client.WiFiClient')
-@patch('src.status.status_updater.StatusUpdater')
-def configuration_web_api(WiFiClientMock, StatusUpdaterMock) -> ConfigurationWebAPI:
+@patch('src.status.device_status.DeviceStatus')
+def configuration_web_api(WiFiClientMock, DeviceStatusMock) -> ConfigurationWebAPI:
     wifi_client_mock = WiFiClientMock()
-    status_updater_mock = StatusUpdaterMock()
-    instance = ConfigurationWebAPI(wifi_client_mock, status_updater_mock)
+    device_status_mock = DeviceStatusMock()
+    instance = ConfigurationWebAPI(wifi_client_mock, device_status_mock)
 
     # Mock HTTPServer
     mocked_server = HTTPServerMock(HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIENTS,
@@ -144,7 +144,7 @@ def test_set_device_status_route(configuration_web_api):
     actual = configuration_web_api._set_device_status_route({}, {'turn_on': True})
 
     assert actual == {}
-    configuration_web_api._status_updater.set_status.assert_called_with(True)
+    configuration_web_api._device_status.set_status.assert_called_with(True)
 
 
 def test_set_device_status_route_raises_error_when_turn_on_is_not_provided(configuration_web_api):

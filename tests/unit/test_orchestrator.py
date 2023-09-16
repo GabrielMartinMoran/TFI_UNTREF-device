@@ -29,20 +29,6 @@ def mock_status_updater():
     return MagicMock()
 
 
-def test_start_method_turns_led_on(mock_ap, mock_wifi_client, mock_measures_taker, mock_measures_sender,
-                                   mock_status_updater):
-    orchestrator = Orchestrator(mock_ap, mock_wifi_client, mock_measures_taker, mock_measures_sender,
-                                mock_status_updater)
-
-    mock_led = MagicMock()
-    orchestrator._led = mock_led
-    orchestrator._run_orchestration_loop = lambda: None
-
-    orchestrator.start()
-
-    mock_led.value.assert_called_once_with(1)
-
-
 def test_is_configured_method_returns_true_when_token_and_device_id_are_set():
     mock_state_provider = MagicMock()
     mock_state_provider.get.side_effect = ['my_token', 'my_device_id']
@@ -73,9 +59,13 @@ def test_orchestrate_with_no_configured_networks():
     wifi_client.has_any_network_configured.return_value = False
     measures_taker = MagicMock()
     measures_sender = MagicMock()
-    status_updater = MagicMock()
+    device_status = MagicMock()
+    remote_status_change_detector = MagicMock()
+    mechanical_status_change_detector = MagicMock()
+    configuration_web_api = MagicMock()
 
-    orchestrator = Orchestrator(ap, wifi_client, measures_taker, measures_sender, status_updater)
+    orchestrator = Orchestrator(ap, wifi_client, measures_taker, measures_sender, device_status,
+                                remote_status_change_detector, mechanical_status_change_detector, configuration_web_api)
 
     orchestrator._orchestrate()
 
@@ -83,4 +73,4 @@ def test_orchestrate_with_no_configured_networks():
     wifi_client.is_connected.assert_not_called()
     measures_taker.take_measure.assert_not_called()
     measures_sender.pull_and_send.assert_not_called()
-    status_updater.update_status.assert_not_called()
+    remote_status_change_detector.update_status.assert_not_called()
