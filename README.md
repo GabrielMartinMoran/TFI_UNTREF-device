@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/GabrielMartinMoran/TFI_UNTREF-device/branch/main/graph/badge.svg?token=PRPQM7JVK4)](https://codecov.io/gh/GabrielMartinMoran/TFI_UNTREF-device)
+[![codecov](https://codecov.io/gh/GabrielMartinMoran/TFI_UNTREF-device/branch/master/graph/badge.svg?token=PRPQM7JVK4)](https://codecov.io/gh/GabrielMartinMoran/TFI_UNTREF-device)
 
 # Trabajo Final Integrador - Ingeniería en Computación - UNTREF
 
