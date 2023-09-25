@@ -20,15 +20,15 @@ def main() -> None:
     status_led = StatusLed(False)
     relay = Relay(False)
 
-    # Measures
-    measures_taker = MeasuresTaker()
-    measures_sender = MeasuresSender(measures_taker)
-
     # Status
     status_sender = StatusSender()
     device_status = DeviceStatus(status_sender, status_led, relay)
     remote_status_change_detector = RemoteStatusChangeDetector(device_status)
     mechanical_status_change_detector = MechanicalStatusChangeDetector(device_status)
+
+    # Measures
+    measures_taker = MeasuresTaker(device_status)
+    measures_sender = MeasuresSender(measures_taker)
 
     configuration_web_api = ConfigurationWebAPI(wifi_client, device_status)
 

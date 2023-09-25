@@ -27,7 +27,7 @@ def clean_device() -> None:
     remove_path('')
 
 
-def unpackage() -> None:
+def unpack() -> None:
     print('Unpacking files...')
 
     with open(DEPLOY_PACKAGE_FILENAME, 'r') as f:
@@ -60,7 +60,7 @@ def main() -> None:
 
     clean_device()
 
-    unpackage()
+    unpack()
 
     delete_package_file()
 

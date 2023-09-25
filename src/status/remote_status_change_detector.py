@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 from src.config import INTERVAL_TO_CHECK_NEXT_SCHEDULING_ACTION, REMOTE_API_URI
 from src.http.http_client import HTTPClient
@@ -50,7 +51,7 @@ class RemoteStatusChangeDetector(HTTPClient):
             self._device_status.set_status(turned_on)
             print(f'Updated device status to {"turned on" if turned_on else "turned off"} by a remote action')
 
-    def _get_next_scheduling_action(self) -> 'Optional[SchedulingAction]':
+    def _get_next_scheduling_action(self) -> Optional[SchedulingAction]:
         device_id = StateProvider.get('device_id')
         try:
             response = get(
@@ -67,7 +68,7 @@ class RemoteStatusChangeDetector(HTTPClient):
             return None
         return SchedulingAction.from_dict(json_data)
 
-    def _pull_instant_action(self) -> 'Optional[DeviceAction]':
+    def _pull_instant_action(self) -> Optional[DeviceAction]:
         device_id = StateProvider.get('device_id')
         try:
             response = get(

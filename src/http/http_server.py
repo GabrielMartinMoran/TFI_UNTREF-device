@@ -3,6 +3,7 @@ import json
 import socket
 from _thread import start_new_thread
 from time import sleep
+from typing import List
 
 from src.http import http_methods
 from src.http.request import Request
@@ -65,7 +66,7 @@ class HTTPServer:
         return self._port
 
     @classmethod
-    def _map_url_params(cls, params: 'List[str]') -> dict:
+    def _map_url_params(cls, params: List[str]) -> dict:
         params_map = {}
         for x in params:
             param = x.split('=')
@@ -73,7 +74,7 @@ class HTTPServer:
         return params_map
 
     @classmethod
-    def _partition_url(cls, url: str) -> 'List[str]':
+    def _partition_url(cls, url: str) -> List[str]:
         data = url.replace('?', ' ')
         data = data.replace('&', ' ')
         return data.split(' ')

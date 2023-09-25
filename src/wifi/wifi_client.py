@@ -1,4 +1,5 @@
 import time
+from typing import List
 
 from src.config import WIFI_CLIENT_MAX_CONNECTION_ATTEMPTS, WIFI_CLIENT_DELAY_BETWEEN_ATTEMPTS, \
     SYNC_TIME_MAX_ATTEMPTS, SYNC_TIME_DELAY_BETWEEN_ATTEMPTS
@@ -25,7 +26,7 @@ class WiFiClient:
     def has_any_network_configured(self) -> bool:
         return len(self._wifi_networks) > 0
 
-    def _load_configured_networks(self) -> 'List[WiFiNetwork]':
+    def _load_configured_networks(self) -> List[WiFiNetwork]:
         config = StateProvider.get(self._WIFI_NETWORK_STATE_KEY)
         if config is None:
             return []
@@ -40,7 +41,7 @@ class WiFiClient:
         self._wifi_networks.append(wifi_network)
         StateProvider.set(self._WIFI_NETWORK_STATE_KEY, [x.to_dict() for x in self._wifi_networks])
 
-    def get_configured_networks(self) -> 'List[WiFiNetwork]':
+    def get_configured_networks(self) -> List[WiFiNetwork]:
         return self._wifi_networks
 
     def connect(self) -> None:
@@ -59,7 +60,7 @@ class WiFiClient:
                     self._try_sync_time()
                     return
 
-    def get_available_networks(self) -> 'List[str]':
+    def get_available_networks(self) -> List[str]:
         return [x[0].decode('utf-8') for x in self._sta_if.scan()]
 
     def is_connected(self) -> bool:

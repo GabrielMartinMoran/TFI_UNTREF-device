@@ -7,12 +7,18 @@ else:
 
 
 class GPIOOut:
-    _ON = 0
-    _OFF = 1
 
     def __init__(self, pin_number: int, initial_status: bool) -> None:
         self._pin = Pin(pin_number, Pin.OUT)
         self.set_status(initial_status)
 
     def set_status(self, status: bool) -> None:
-        self._pin.value(self._ON if status else self._OFF)
+        self._pin.value(self._on_value() if status else self._off_value())
+
+    @classmethod
+    def _on_value(cls) -> int:
+        return 0
+
+    @classmethod
+    def _off_value(cls) -> int:
+        return 1

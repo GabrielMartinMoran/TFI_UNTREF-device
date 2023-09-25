@@ -1,4 +1,7 @@
-def median(numbers: 'List[int]') -> int:
+from typing import List
+
+
+def median(numbers: List[int]) -> int:
     sorted_numbers = sorted(numbers)
     length = len(numbers)
     index = (length - 1) // 2
@@ -9,5 +12,5 @@ def median(numbers: 'List[int]') -> int:
         return int((sorted_numbers[index] + sorted_numbers[index + 1]) / 2.0)
 
 
-def mean(numbers: 'List[int]') -> int:
+def mean(numbers: List[int]) -> int:
     return int(sum(numbers) / len(numbers))

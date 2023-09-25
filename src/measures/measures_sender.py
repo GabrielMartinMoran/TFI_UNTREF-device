@@ -1,3 +1,5 @@
+from typing import List
+
 from src.config import REMOTE_API_URI, MAX_MEASURES_BATCH_SIZE
 from src.exceptions.unauthenticated_exception import UnauthenticatedException
 from src.http.http_client import HTTPClient
@@ -18,7 +20,7 @@ class MeasuresSender(HTTPClient):
     def __init__(self, measures_taker: MeasuresTaker) -> None:
         self._measures_taker = measures_taker
 
-    def _send_measures(self, measures: 'List[Measure]') -> bool:
+    def _send_measures(self, measures: List[Measure]) -> bool:
         """
         :param measures: List of measures to send
         :return: Returns True when measures could be sent to the server

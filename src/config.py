@@ -5,8 +5,25 @@ AC_SENSOR_PIN = 34
 STATUS_CHANGE_BUTTON_PIN = 25
 RELAY_PIN = 32
 
-AC_FREQUENCY = 50
-AC_VOLTAGE = 220
+AC_LIN_FREQUENCY = 50
+AC_LINE_VOLTAGE = 220
+RMS_SINE_FACTOR = 0.707
+AC_LINE_RMS_VOLTAGE = AC_LINE_VOLTAGE * RMS_SINE_FACTOR
+
+
+"""
+    Sensor: ACS712 5A version
+    Regarding sensor sensitivity, for a 5v output, the default sensitivity is 0.185 V/A going from -5V to 5V
+    Reducing the voltage with a voltage divider where R1=1KΩ and R2=2KΩ, we get a reference voltage of 3.3V
+    We can correct SENSOR_SENSITIVITY from 0.185 V/A at 5V to -> 0.185 V/A * (R1/(R1+R2)) = 0.06167 V/A
+    (Thanks to https://github.com/RobTillaart/ACS712)
+"""
+CURRENT_SENSOR_BASE_SENSITIVITY = 0.185  # [V/A]
+CURRENT_SENSOR_VOLTAGE_DIVIDER_R1 = 1000  # [Ω]
+CURRENT_SENSOR_VOLTAGE_DIVIDER_R2 = 2000  # [Ω]
+CURRENT_SENSOR_SENSITIVITY = CURRENT_SENSOR_BASE_SENSITIVITY * (
+        CURRENT_SENSOR_VOLTAGE_DIVIDER_R1 / (CURRENT_SENSOR_VOLTAGE_DIVIDER_R1 + CURRENT_SENSOR_VOLTAGE_DIVIDER_R2)
+)
 
 MEASURES_PER_CICLE = 20
 

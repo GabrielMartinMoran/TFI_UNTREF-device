@@ -1,3 +1,5 @@
+from typing import List
+
 from src.config import HTTP_SERVER_HOST, HTTP_SERVER_PORT, HTTP_SERVER_MAX_CLIENTS, HTTP_SERVER_PRINT_LOGS
 from src.http import http_methods
 from src.http.http_server import HTTPServer
@@ -48,14 +50,14 @@ class ConfigurationWebAPI:
         self._should_be_running = False
         return {'stopping': True}
 
-    def _get_available_networks_route(self, params: dict, body: dict) -> 'List[str]':
+    def _get_available_networks_route(self, params: dict, body: dict) -> List[str]:
         return self._wifi_client.get_available_networks()
 
     def _configure_network_route(self, params: dict, body: dict) -> dict:
         self._wifi_client.register_network(WiFiNetwork.from_dict(body))
         return {}
 
-    def _get_configured_wifi_networks_route(self, params: dict, body: dict) -> 'List[dict]':
+    def _get_configured_wifi_networks_route(self, params: dict, body: dict) -> List[dict]:
         return [x.to_dict() for x in self._wifi_client.get_configured_networks()]
 
     @classmethod

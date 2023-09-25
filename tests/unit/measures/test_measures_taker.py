@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from src.measures.measure import Measure
@@ -10,7 +12,8 @@ from platform_mocks.machine import RTC
 def measures_taker() -> MeasuresTaker:
     MeasuresTaker._MEASUREMENT_TIME = 0.01
     MeasuresTaker._STANDBY_VOLTAGE_MEASUREMENT_TIME = 0.01
-    return MeasuresTaker()
+    device_status = MagicMock()
+    return MeasuresTaker(device_status)
 
 
 def test_measures_taker_adds_new_measure(measures_taker):

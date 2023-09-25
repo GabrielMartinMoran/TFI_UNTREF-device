@@ -1,3 +1,5 @@
+from typing import Optional
+
 try:
     from pynput.keyboard import Listener
 except ImportError:
@@ -25,7 +27,7 @@ class Pin:
         if self._mode == Pin.IN:
             start_new_thread(self._register_key_listener, ())
 
-    def value(self, value: 'Optional[int]' = None) -> 'Optional[int]':
+    def value(self, value: Optional[int] = None) -> Optional[int]:
         if value is None:
             return self._value
         self._value = value
