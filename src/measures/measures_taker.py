@@ -15,8 +15,6 @@ else:
 from src.measures.measure import Measure
 
 
-# REFERENCE: https://www.circuitschools.com/measure-ac-current-by-interfacing-acs712-sensor-with-esp32/
-
 class MeasuresTaker:
     _MAX_MEASURES_BUFFER_SIZE = 20
     _MAX_SENSOR_OUT_VOLTAGE = 3.3
@@ -100,4 +98,4 @@ class MeasuresTaker:
     def _calculate_rms_current(self, measures: List[int]) -> float:
         m_rms = self._calculate_rms(measures)
         v_rms = (m_rms * self._MAX_SENSOR_OUT_VOLTAGE) / self._ADC_RESOLUTION_SIZE
-        return (v_rms - self._MAX_SENSOR_OUT_VOLTAGE) / config.CURRENT_SENSOR_SENSITIVITY
+        return (v_rms - (self._MAX_SENSOR_OUT_VOLTAGE / 2)) / config.CURRENT_SENSOR_SENSITIVITY

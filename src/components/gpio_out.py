@@ -17,8 +17,8 @@ class GPIOOut:
 
     @classmethod
     def _on_value(cls) -> int:
-        return 0
+        return 1
 
     @classmethod
     def _off_value(cls) -> int:
-        return 1
+        return 0
