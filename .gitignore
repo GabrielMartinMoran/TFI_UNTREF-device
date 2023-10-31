@@ -153,5 +153,5 @@ dmypy.json
 cython_debug/
 
 .idea/
-_state.json
+*state.json
 /deploy-package.json
