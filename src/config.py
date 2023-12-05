@@ -34,7 +34,7 @@ if PlatformChecker.is_device():
     HTTP_SERVER_HOST = '192.168.4.1'
     HTTP_SERVER_PORT = 80
 else:
-    HTTP_SERVER_HOST = 'localhost'
+    HTTP_SERVER_HOST = ''
     HTTP_SERVER_PORT = 5001
 
 HTTP_SERVER_MAX_CLIENTS = 1
