@@ -10,7 +10,6 @@ AC_LINE_VOLTAGE = 220
 RMS_SINE_FACTOR = 0.707
 AC_LINE_RMS_VOLTAGE = AC_LINE_VOLTAGE * RMS_SINE_FACTOR
 
-
 """
     Sensor: ACS712 5A version
     Regarding sensor sensitivity, for a 5v output, the default sensitivity is 0.185 V/A going from -5V to 5V
@@ -31,7 +30,7 @@ ON = 1
 OFF = 0
 
 if PlatformChecker.is_device():
-    HTTP_SERVER_HOST = '192.168.4.1'
+    HTTP_SERVER_HOST = ''  # '192.168.4.1'
     HTTP_SERVER_PORT = 80
 else:
     HTTP_SERVER_HOST = ''

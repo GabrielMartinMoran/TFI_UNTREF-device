@@ -61,6 +61,7 @@ class WiFiClient:
                     return
 
     def get_available_networks(self) -> List[str]:
+        self._sta_if.active(True)
         return [x[0].decode('utf-8') for x in self._sta_if.scan()]
 
     def is_connected(self) -> bool:
