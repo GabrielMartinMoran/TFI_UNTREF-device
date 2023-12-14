@@ -19,6 +19,8 @@ MOCKED_MODULES = [
     }
 ]
 
+NUM_PACKAGES = 2
+
 
 @dataclass
 class FileToSend:
@@ -48,11 +50,16 @@ def search_files_to_copy(path: str) -> List[FileToSend]:
     return files
 
 
-def generate_package(files: List[FileToSend]) -> dict:
+def generate_packages(files: List[FileToSend]) -> List[dict]:
+    packages = []
     package = {}
     for file in files:
+        if len(package) >= len(files) / NUM_PACKAGES:
+            packages.append(package)
+            package = {}
         package[file.get_final_name()] = file.get_content()
-    return package
+    packages.append(package)
+    return packages
 
 
 def search_mocked_modules_to_copy() -> List[FileToSend]:
@@ -72,14 +79,18 @@ def main() -> None:
 
     files_to_copy += search_mocked_modules_to_copy()
 
-    print('Generating deployment package...')
-    package = generate_package(files_to_copy)
-    with open('deploy-package.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(package))
+    print('Generating deployment packages...')
+    packages = generate_packages(files_to_copy)
+    for i, package in enumerate(packages):
+        with open(f'deploy-package-{i}.json', 'w', encoding='utf-8') as f:
+            f.write(json.dumps(package))
 
     print('Uploading packaged scripts (this operation may take some time)...')
-    subprocess.run(['ampy', '-p', USB_INTERFACE, 'put', 'deploy-package.json', 'deploy-package.json'],
-                   cwd=os.getcwd())
+    for i, package in enumerate(packages):
+        package_name = f'deploy-package-{i}.json'
+        print(f'    - Uploading {package_name}')
+        subprocess.run(['ampy', '-p', USB_INTERFACE, 'put', package_name, package_name],
+                       cwd=os.getcwd())
 
     print('Requesting file unpacking...')
     subprocess.run(['ampy', '-p', USB_INTERFACE, 'run', 'unpack_files.py'], cwd=os.getcwd())

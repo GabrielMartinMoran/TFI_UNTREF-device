@@ -1,4 +1,3 @@
-import time
 from typing import Optional
 
 from src.config import INTERVAL_TO_CHECK_NEXT_SCHEDULING_ACTION, REMOTE_API_URI
@@ -9,11 +8,14 @@ from src.status.actions.scheduling_action import SchedulingAction
 
 from src.platform_checker import PlatformChecker
 from src.state.state_provider import StateProvider
+from src.utils.epoch_converter import datetime_to_epoch
 from src.utils.request_status_checker import raise_if_failed
 
 if PlatformChecker.is_device():
+    from machine import RTC
     from urequests import get
 else:
+    from platform_mocks.machine import RTC
     from requests import get
 
 
@@ -23,6 +25,7 @@ class RemoteStatusChangeDetector(HTTPClient):
         self._device_status = device_status
         self._next_scheduling_action = None
         self._last_scheduling_action_check = 0
+        self._rtc = RTC()
 
     def update_status(self) -> None:
         # First: Evaluate instant actions
@@ -37,7 +40,7 @@ class RemoteStatusChangeDetector(HTTPClient):
         self._apply_scheduled_action_if_required()
 
     def _pull_scheduling_action_if_required(self) -> None:
-        now = time.time()
+        now = datetime_to_epoch(self._rtc.datetime())
         if self._next_scheduling_action is None or now - self._last_scheduling_action_check \
                 >= INTERVAL_TO_CHECK_NEXT_SCHEDULING_ACTION:
             try:
@@ -89,7 +92,7 @@ class RemoteStatusChangeDetector(HTTPClient):
     def _apply_scheduled_action_if_required(self):
         if self._next_scheduling_action is None:
             return
-        now = time.time()
+        now = datetime_to_epoch(self._rtc.datetime())
         if now >= self._next_scheduling_action.moment and not self._next_scheduling_action.was_evaluated:
             self._next_scheduling_action.was_evaluated = True
             self.set_status(self._next_scheduling_action.is_turn_on())

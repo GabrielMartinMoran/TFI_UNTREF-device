@@ -12,9 +12,9 @@ def remote_status_change_detector(DeviceStatusMock) -> RemoteStatusChangeDetecto
     return RemoteStatusChangeDetector(device_status_mock)
 
 
-@patch('src.status.remote_status_change_detector.time.time')
-def test_pull_scheduling_action_if_required(mock_time, remote_status_change_detector):
-    mock_time.return_value = 0
+@patch('src.utils.epoch_converter.datetime_to_epoch')
+def test_pull_scheduling_action_if_required(mock_datetime_to_epoch, remote_status_change_detector):
+    mock_datetime_to_epoch.return_value = 0
     remote_status_change_detector._last_scheduling_action_check = 0
     remote_status_change_detector._next_scheduling_action = None
     remote_status_change_detector._get_next_scheduling_action = Mock(return_value=None)
@@ -47,9 +47,9 @@ def test_pull_instant_action(mock_get, remote_status_change_detector):
     assert remote_status_change_detector._pull_instant_action() is None
 
 
-@patch('src.status.remote_status_change_detector.time.time')
-def test_apply_scheduled_action_if_required(mock_time, remote_status_change_detector):
-    mock_time.return_value = 0
+@patch('src.utils.epoch_converter.datetime_to_epoch')
+def test_apply_scheduled_action_if_required(mock_datetime_to_epoch, remote_status_change_detector):
+    mock_datetime_to_epoch.return_value = 0
     remote_status_change_detector._next_scheduling_action = None
     remote_status_change_detector._apply_scheduled_action_if_required()
     assert not remote_status_change_detector._next_scheduling_action

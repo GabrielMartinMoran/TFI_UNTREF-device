@@ -24,7 +24,7 @@ class MeasuresTaker:
     _STANDBY_VOLTAGE_MEASUREMENT_TIME = 2  # Seconds
 
     # At least twice the speed for better sampling (Nyquist theorem)
-    _TIME_TO_WAIT_BETWEEN_MEASURES = 1 / (config.AC_LIN_FREQUENCY * config.MEASURES_PER_CICLE)
+    _TIME_TO_WAIT_BETWEEN_MEASURES = 1 / (config.AC_LINE_FREQUENCY * config.MEASURES_PER_CYCLE)
 
     def __init__(self, device_status: DeviceStatus) -> None:
         self._device_status = device_status
@@ -35,13 +35,16 @@ class MeasuresTaker:
         self._ac_sensor.atten(ADC.ATTN_0DB)
         self._calculate_current_error()
 
-    def _measure_current(self, measurement_time: float) -> float:
+    def _measure_current(self, measurement_time: float, use_calibration_factor: bool = True) -> float:
         t_end = time.time() + measurement_time
 
         measures = []
 
         while time.time() < t_end:
-            measures.append(self._ac_sensor.read())
+            measure = self._ac_sensor.read()
+            if use_calibration_factor:
+                measure -= config.MEASURES_CALIBRATION_OFFSET
+            measures.append(measure)
             time.sleep(self._TIME_TO_WAIT_BETWEEN_MEASURES)
 
         current = self._calculate_rms_current(measures)
@@ -59,7 +62,7 @@ class MeasuresTaker:
         # Wait to ensure the status change
         time.sleep(0.5)
         # It assumes the connected device is turned off
-        self._current_error = self._measure_current(self._STANDBY_VOLTAGE_MEASUREMENT_TIME)
+        self._current_error = self._measure_current(self._STANDBY_VOLTAGE_MEASUREMENT_TIME, False)
         print(f'IDLE CURRENT MEASUREMENT ERROR: {self._current_error} A')
         # Recover the previous status
         self._device_status.set_status(prev_status)
@@ -82,8 +85,11 @@ class MeasuresTaker:
 
     def take_measure(self) -> None:
         # We take the absolute value of the rms current
-        rms_current = abs(self._measure_current(self._MEASUREMENT_TIME) - self._current_error)
-        print(f'RMS Current: {rms_current} A | RMS Power: {rms_current * config.AC_LINE_RMS_VOLTAGE} W')
+        measured_current = self._measure_current(self._MEASUREMENT_TIME)
+        rms_current = abs(measured_current - self._current_error)
+        print(f'Measured Current: {measured_current} A | ' +
+              f'RMS Current: {rms_current} A | ' +
+              f'RMS Power: {rms_current * config.AC_LINE_RMS_VOLTAGE} W')
         measure = Measure(
             timestamp=RTC().datetime(),
             voltage=config.AC_LINE_RMS_VOLTAGE,
@@ -97,5 +103,6 @@ class MeasuresTaker:
 
     def _calculate_rms_current(self, measures: List[int]) -> float:
         m_rms = self._calculate_rms(measures)
+        print(f'Muestra RMS: {m_rms}')
         v_rms = (m_rms * self._MAX_SENSOR_OUT_VOLTAGE) / self._ADC_RESOLUTION_SIZE
         return (v_rms - (self._MAX_SENSOR_OUT_VOLTAGE / 2)) / config.CURRENT_SENSOR_SENSITIVITY
